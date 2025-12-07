@@ -111,6 +111,9 @@ final class Amazon_MCF {
 
         // Initialize order fulfillment (runs on both admin and frontend for hooks)
         new Amazon_MCF\Order_Fulfillment();
+
+        // Initialize inventory sync
+        new Amazon_MCF\Inventory_Sync();
     }
 
     /**
@@ -134,6 +137,7 @@ final class Amazon_MCF {
         $includes = [
             'includes/class-api-client.php',
             'includes/class-order-fulfillment.php',
+            'includes/class-inventory-sync.php',
             'includes/admin/class-settings.php',
             'includes/admin/class-product-importer-page.php',
         ];
@@ -168,6 +172,9 @@ final class Amazon_MCF {
      * Plugin deactivation
      */
     public function deactivate(): void {
+        // Unschedule inventory sync cron
+        Amazon_MCF\Inventory_Sync::unschedule_sync();
+
         flush_rewrite_rules();
     }
 }
