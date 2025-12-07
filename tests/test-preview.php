@@ -19,8 +19,8 @@ $address = new Address(
     countryCode: 'US'
 );
 
-// Use first SKU from your inventory - replace if needed
-$testSku = $argv[1] ?? '1U-9KEJ-M7PL';
+// Use first active SKU from your inventory - can override via CLI arg
+$testSku = $argv[1] ?? '7K-RRVP-UW1O';
 
 $items = [
     new GetFulfillmentPreviewItem(

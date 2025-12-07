@@ -23,30 +23,10 @@ try {
         marketplaceIds: [$config['marketplace_id']]
     );
 
-    // Use raw JSON due to SDK deserialization bug
     $data = $response->json();
 
-    echo "✓ Inventory retrieved successfully!\n\n";
-
-    if (empty($data['payload']['inventorySummaries'])) {
-        echo "No inventory found in FBA.\n";
-    } else {
-        $activeCount = 0;
-        foreach ($data['payload']['inventorySummaries'] as $item) {
-            $total = $item['totalQuantity'] ?? 0;
-            if ($total > 0) {
-                $activeCount++;
-                printf(
-                    "SKU: %-20s | ASIN: %-12s | Qty: %5d | %s\n",
-                    $item['sellerSku'],
-                    $item['asin'],
-                    $total,
-                    substr($item['productName'], 0, 50)
-                );
-            }
-        }
-        echo "\nActive SKUs with inventory: {$activeCount}\n";
-    }
+    echo "=== RAW API RESPONSE ===\n\n";
+    echo json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
 } catch (Exception $e) {
     echo "✗ Error: " . $e->getMessage() . "\n";
