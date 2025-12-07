@@ -19,23 +19,26 @@ $address = new Address(
     countryCode: 'US'
 );
 
-// Test item - use one of your actual SKUs
+// Use first SKU from your inventory - replace if needed
+$testSku = $argv[1] ?? '1U-9KEJ-M7PL';
+
 $items = [
     new GetFulfillmentPreviewItem(
-        sellerSku: 'YOUR-SKU-HERE',  // Replace with actual SKU
+        sellerSku: $testSku,
         quantity: 1,
         sellerFulfillmentOrderItemId: 'test-item-1'
     )
 ];
 
 try {
-    $connector = SellingPartnerApi::seller(
+    $baseConnector = new SellingPartnerApi(
         clientId: $config['lwa_client_id'],
         clientSecret: $config['lwa_client_secret'],
         refreshToken: $config['refresh_token'],
         endpoint: Endpoint::NA,
     );
 
+    $connector = $baseConnector->seller();
     $api = $connector->fbaOutboundV20200701();
 
     $request = new GetFulfillmentPreviewRequest(
@@ -46,21 +49,36 @@ try {
     );
 
     $response = $api->getFulfillmentPreview($request);
-    $data = $response->dto();
 
-    echo "✓ Fulfillment preview retrieved!\n\n";
+    // Use raw JSON due to potential SDK deserialization issues
+    $data = $response->json();
 
-    foreach ($data->payload->fulfillmentPreviews as $preview) {
-        $fulfillable = $preview->isFulfillable ? 'Yes' : 'No';
-        echo "Speed: {$preview->shippingSpeedCategory}\n";
-        echo "  Fulfillable: {$fulfillable}\n";
+    echo "✓ Fulfillment preview retrieved for SKU: {$testSku}\n\n";
 
-        if ($preview->isFulfillable && !empty($preview->fulfillmentPreviewShipments)) {
-            $shipment = $preview->fulfillmentPreviewShipments[0];
-            echo "  Earliest Arrival: {$shipment->earliestArrivalDate}\n";
-            echo "  Latest Arrival: {$shipment->latestArrivalDate}\n";
+    if (empty($data['payload']['fulfillmentPreviews'])) {
+        echo "No fulfillment previews returned.\n";
+    } else {
+        foreach ($data['payload']['fulfillmentPreviews'] as $preview) {
+            $fulfillable = $preview['isFulfillable'] ? 'Yes' : 'No';
+            echo "Speed: {$preview['shippingSpeedCategory']}\n";
+            echo "  Fulfillable: {$fulfillable}\n";
+
+            if (!$preview['isFulfillable'] && !empty($preview['unfulfillablePreviewItems'])) {
+                foreach ($preview['unfulfillablePreviewItems'] as $unfulfillable) {
+                    $reasons = $unfulfillable['itemUnfulfillableReasons'] ?? [];
+                    if (!empty($reasons)) {
+                        echo "  Reason: {$reasons[0]}\n";
+                    }
+                }
+            }
+
+            if ($preview['isFulfillable'] && !empty($preview['fulfillmentPreviewShipments'])) {
+                $shipment = $preview['fulfillmentPreviewShipments'][0];
+                echo "  Earliest Arrival: {$shipment['earliestArrivalDate']}\n";
+                echo "  Latest Arrival: {$shipment['latestArrivalDate']}\n";
+            }
+            echo "\n";
         }
-        echo "\n";
     }
 
 } catch (Exception $e) {
