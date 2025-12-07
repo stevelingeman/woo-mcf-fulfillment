@@ -1,0 +1,19 @@
+# Credentials (NEVER commit)
+config.php
+*.env
+.env*
+
+# Composer
+/tests/vendor/
+/plugin/amazon-mcf/vendor/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
