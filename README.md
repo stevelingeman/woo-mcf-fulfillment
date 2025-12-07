@@ -3,10 +3,10 @@
 WooCommerce plugin for Amazon Multi-Channel Fulfillment (MCF) integration via SP-API.
 
 ## Status
-- [ ] Phase A: SP-API credential testing
+- [x] Phase A: SP-API credential testing
 - [ ] Phase B: MCF order lifecycle testing
 - [ ] Phase C: SQS notifications setup
-- [ ] Phase D: WooCommerce installation
+- [x] Phase D: WooCommerce installation
 - [ ] Phase E: Plugin development
 
 ## Structure
